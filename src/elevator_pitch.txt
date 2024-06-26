@@ -1,0 +1,13 @@
+Familiar with the Caitlin Clark and Angel Reese? Or legends like Diana Taurasi and Sue Bird? 
+
+If your answer is no or yes and you want to learn more about the WNBA, check out HoopsIQ.
+
+We're a group of sports enthusiasts and the problem we have noticed is that the data currently available for the WNBA is not as user friendly for non basketball savvy users. 
+
+Additionally, we have seen current LLMs report false information on the WNBA. 
+
+As a result, we are aiming to develop a Q&A engine with WNBA data that personalizes responses using basketball specific domain language. 
+
+We are aiming to attract users who might not be the most well-versed in basketball but would like to know such details to either learn or take advantage of these details, for example when participating in fantasy basketball or sports betting.
+
+Check us out!
