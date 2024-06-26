@@ -12,7 +12,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS wnba_db.wnba_play_by_play_2023_24_raw (
     period_display_value STRING,
     clock_display_value STRING,
     scoring_play BOOLEAN,
-    score_value STRING,
+    score_value INT,
     team_id STRING,
     athlete_id_1 STRING,
     athlete_id_2 STRING,
@@ -54,7 +54,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS wnba_db.wnba_play_by_play_2023_24_raw (
     end_quarter_seconds_remaining STRING,
     end_half_seconds_remaining STRING,
     end_game_seconds_remaining STRING,
-    period STRING,
+    period INT,
     lag_qtr STRING,
     lag_half STRING,
     coordinate_x DOUBLE,
@@ -68,7 +68,7 @@ WITH SERDEPROPERTIES (
     'separatorChar' = ',',
     'quoteChar' = '\"'
 )
-LOCATION 's3://wnballmbucketar/play-by-play/2023-24/'
+LOCATION 's3://wnbadata/play-by-play/2023-24/'
 TBLPROPERTIES (
     'skip.header.line.count'='1',
     'has_encrypted_data'='false'

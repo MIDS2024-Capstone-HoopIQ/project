@@ -1,4 +1,4 @@
-CREATE TABLE wnba_teambox AS (
+CREATE TABLE wnba_db.wnba_teambox AS (
 SELECT
     CAST(game_id AS BIGINT) AS game_id,
     CAST(season AS INT) AS season,

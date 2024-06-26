@@ -75,5 +75,5 @@ WITH SERDEPROPERTIES (
     'separatorChar' = ',',
     'quoteChar' = '\"'
 )
-LOCATION 's3://wnballmbucketar/schedule/2019/'
+LOCATION 's3://wnbadata/schedule/2019/'
 TBLPROPERTIES ('skip.header.line.count'='1', 'has_encrypted_data'='false');

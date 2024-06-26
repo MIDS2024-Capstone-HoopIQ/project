@@ -21,7 +21,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS wnba_db.wnba_play_by_play_2018_22_raw (
     coordinate_x_raw DOUBLE,
     coordinate_y_raw DOUBLE,
     season INT,
-    season_type INT,
+    season_type STRING,
     away_team_id STRING,
     away_team_name STRING,
     away_team_mascot STRING,
@@ -42,16 +42,16 @@ CREATE EXTERNAL TABLE IF NOT EXISTS wnba_db.wnba_play_by_play_2018_22_raw (
     clock_minutes INT,
     clock_seconds DOUBLE,
     half INT,
-    game_half INT,
+    game_half STRING,
     lead_qtr STRING,
     lead_game_half STRING,
-    start_quarter_seconds_remaining INT,
-    start_half_seconds_remaining INT,
-    start_game_seconds_remaining INT,
+    start_quarter_seconds_remaining STRING,
+    start_half_seconds_remaining STRING,
+    start_game_seconds_remaining STRING,
     game_play_number INT,
-    end_quarter_seconds_remaining INT,
-    end_half_seconds_remaining INT,
-    end_game_seconds_remaining INT,
+    end_quarter_seconds_remaining STRING,
+    end_half_seconds_remaining STRING,
+    end_game_seconds_remaining STRING,
     period INT,
     lag_qtr STRING,
     lag_game_half STRING,
@@ -66,7 +66,7 @@ WITH SERDEPROPERTIES (
     'separatorChar' = ',',
     'quoteChar' = '\"'
 )
-LOCATION 's3://wnballmbucketar/play-by-play/2018-22/'
+LOCATION 's3://wnbadata/play-by-play/2018-22/'
 TBLPROPERTIES (
     'skip.header.line.count'='1',
     'has_encrypted_data'='false'
