@@ -1,0 +1,7 @@
+python == 3.11
+boto3
+pyathena[sqlalchemy] or pyathena\[sqlalchemy\]
+langchain
+langchain-community
+langchain-openai
+langchain-core
