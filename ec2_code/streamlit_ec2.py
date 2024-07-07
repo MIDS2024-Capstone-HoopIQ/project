@@ -3,8 +3,21 @@ import pandas as pd
 import datetime
 from wnba_langchain import get_response
 
-st.title("WNBA Data Chatbot")
-st.write("Ask a question about the WNBA data:")
+st.title("HoopsIQ - WNBA")
+st.write("Ask a question about WNBA data:")
+st.markdown(
+    """
+    <style>
+    .big-divider {
+        height: 5px;
+        background-color: #333;
+        margin: 20px 0;
+    }
+    </style>
+    <div class="big-divider"></div>
+    """,
+    unsafe_allow_html=True
+)
 
 if 'responses' not in st.session_state:
     st.session_state.responses = []
@@ -19,5 +32,6 @@ def handle_query():
 		
 st.text_input("Your question:", key='query', on_change=handle_query)
 
-for response in st.session_state.responses:
+for response in reversed(st.session_state.responses):
     st.write(response)
+    st.markdown("---")
