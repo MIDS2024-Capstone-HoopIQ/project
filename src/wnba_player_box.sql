@@ -1,33 +1,33 @@
-CREATE EXTERNAL TABLE IF NOT EXISTS wnba_db.wnba_player_box (
+CREATE EXTERDOUBLEL TABLE IF NOT EXISTS wnba_db.wnba_player_box_new (
     record_number STRING,
-    game_id BIGINT,
-    season INT,
-    season_type INT,
+    game_id STRING,
+    season DOUBLE,
+    season_type DOUBLE,
     game_date STRING,
     game_date_time STRING,
     athlete_id STRING,
     athlete_display_name STRING,
-    team_id INT,
+    team_id STRING,
     team_name STRING,
     team_location STRING,
     team_short_display_name STRING,
-    minutes STRING,
-    field_goals_made STRING,
-    field_goals_attempted STRING,
-    three_point_field_goals_made STRING,
-    three_point_field_goals_attempted STRING,
-    free_throws_made STRING,
-    free_throws_attempted STRING,
-    offensive_rebounds STRING,
-    defensive_rebounds STRING,
-    rebounds STRING,
-    assists STRING,
-    steals STRING,
-    blocks STRING,
-    turnovers STRING,
-    fouls STRING,
-    plus_minus STRING,
-    points STRING,
+    minutes DOUBLE,
+    field_goals_made DOUBLE,
+    field_goals_attempted DOUBLE,
+    three_point_field_goals_made DOUBLE,
+    three_point_field_goals_attempted DOUBLE,
+    free_throws_made DOUBLE,
+    free_throws_attempted DOUBLE,
+    offensive_rebounds DOUBLE,
+    defensive_rebounds DOUBLE,
+    rebounds DOUBLE,
+    assists DOUBLE,
+    steals DOUBLE,
+    blocks DOUBLE,
+    turnovers DOUBLE,
+    fouls DOUBLE,
+    plus_minus DOUBLE,
+    points DOUBLE,
     starter BOOLEAN,
     ejected BOOLEAN,
     did_not_play BOOLEAN,
@@ -47,7 +47,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS wnba_db.wnba_player_box (
     team_alternate_color STRING,
     home_away STRING,
     team_winner BOOLEAN,
-    team_score INT,
+    team_score DOUBLE,
     opponent_team_id STRING,
     opponent_team_name STRING,
     opponent_team_location STRING,
@@ -56,14 +56,14 @@ CREATE EXTERNAL TABLE IF NOT EXISTS wnba_db.wnba_player_box (
     opponent_team_logo STRING,
     opponent_team_color STRING,
     opponent_team_alternate_color STRING,
-    opponent_team_score INT
+    opponent_team_score DOUBLE
 )
 ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
 WITH SERDEPROPERTIES (
     'separatorChar' = ',',
     'quoteChar' = '\"'
 )
-LOCATION 's3://wnballmbucketar/player-box/'
+LOCATION 's3://wnbadata/player-box/wnba_player_box/'
 TBLPROPERTIES (
     'skip.header.line.count'='1',
     'has_encrypted_data'='false'
