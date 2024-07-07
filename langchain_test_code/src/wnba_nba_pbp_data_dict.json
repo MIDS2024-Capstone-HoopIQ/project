@@ -64,22 +64,22 @@
     },
     {
       "column_name": "team_id",
-      "column_type": "STRING",
+      "column_type": "INT",
       "column_description": "Identifier for the team involved in the play."
     },
     {
       "column_name": "athlete_id_1",
-      "column_type": "STRING",
+      "column_type": "INT",
       "column_description": "Athlete ID for main person in event."
     },
     {
       "column_name": "athlete_id_2",
-      "column_type": "STRING",
+      "column_type": "INT",
       "column_description": "Athlete ID for secondary person in event."
     },
     {
       "column_name": "athlete_id_3",
-      "column_type": "STRING",
+      "column_type": "INT",
       "column_description": "Athlete ID for third person in event."
     },
     {
@@ -114,7 +114,7 @@
     },
     {
       "column_name": "away_team_id",
-      "column_type": "STRING",
+      "column_type": "INT",
       "column_description": "Numeric identifier for the away team."
     },
     {
@@ -139,7 +139,7 @@
     },
     {
       "column_name": "home_team_id",
-      "column_type": "STRING",
+      "column_type": "INT",
       "column_description": "Numeric identifier for the home team."
     },
     {
@@ -239,17 +239,17 @@
     },
     {
       "column_name": "start_quarter_seconds_remaining",
-      "column_type": "INT",
+      "column_type": "DOUBLE",
       "column_description": "Number of seconds in the quarter remaining."
     },
     {
       "column_name": "start_half_seconds_remaining",
-      "column_type": "INT",
+      "column_type": "DOUBLE",
       "column_description": "Number of seconds in the half remaining."
     },
     {
       "column_name": "start_game_seconds_remaining",
-      "column_type": "INT",
+      "column_type": "DOUBLE",
       "column_description": "Number of seconds in the game remaining."
     },
     {
@@ -259,17 +259,17 @@
     },
     {
       "column_name": "end_quarter_seconds_remaining",
-      "column_type": "INT",
+      "column_type": "DOUBLE",
       "column_description": "Number of seconds in the quarter remaining."
     },
     {
       "column_name": "end_half_seconds_remaining",
-      "column_type": "INT",
+      "column_type": "DOUBLE",
       "column_description": "Number of seconds in the half remaining."
     },
     {
       "column_name": "end_game_seconds_remaining",
-      "column_type": "INT",
+      "column_type": "DOUBLE",
       "column_description": "Number of seconds in the game remaining."
     },
     {
@@ -299,12 +299,12 @@
     },
     {
       "column_name": "game_date",
-      "column_type": "STRING",
+      "column_type": "DATE",
       "column_description": "Date of the game."
     },
     {
       "column_name": "game_date_time",
-      "column_type": "STRING",
+      "column_type": "TIMESTAMP",
       "column_description": "Date and time when the game was played."
     },
     {

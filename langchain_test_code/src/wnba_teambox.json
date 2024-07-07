@@ -7,7 +7,7 @@
     {"column_name": "season_type", "column_type": "int", "column_description": "The type of the season (e.g. regular, playoff)"},
     {"column_name": "game_date", "column_type": "date", "column_description": "The date on which the game was played"},
     {"column_name": "game_date_time", "column_type": "timestamp", "column_description": "The date and time when the game was played"},
-    {"column_name": "team_id", "column_type": "string", "column_description": "Unique identifier for the team"},
+    {"column_name": "team_id", "column_type": "int", "column_description": "Unique identifier for the team"},
     {"column_name": "team_uid", "column_type": "string", "column_description": "Unique identifier for the team within the league"},
     {"column_name": "team_slug", "column_type": "string", "column_description": "Slug identifier for the team"},
     {"column_name": "team_location", "column_type": "string", "column_description": "The location of the team"},
@@ -58,6 +58,6 @@
     {"column_name": "opponent_team_color", "column_type": "string", "column_description": "The primary color of the opponent team"},
     {"column_name": "opponent_team_alternate_color", "column_type": "string", "column_description": "The alternate color of the opponent team"},
     {"column_name": "opponent_team_logo", "column_type": "string", "column_description": "URL to the opponent team's logo"},
-    {"column_name": "opponent_team_score", "column_type": "string", "column_description": "The score of the opponent team"}
+    {"column_name": "opponent_team_score", "column_type": "int", "column_description": "The score of the opponent team"}
   ]
 }
