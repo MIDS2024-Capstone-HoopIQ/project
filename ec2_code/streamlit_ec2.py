@@ -26,12 +26,12 @@ def handle_query():
     query = st.session_state.query
     if query:
         langchain_response = get_response(query)
-        streamlit_response = f"Question:\n\n{query}\n\n\nResponse:\n\n{langchain_response}"
+        streamlit_response = f"<b>Question:</b>\n\n{query}\n\n\n<b>Response:</b>\n\n{langchain_response}"
         st.session_state.responses.append(streamlit_response)
         st.session_state.query = ""
 		
 st.text_input("Your question:", key='query', on_change=handle_query)
 
 for response in reversed(st.session_state.responses):
-    st.write(response)
     st.markdown("---")
+    st.markdown(response, unsafe_allow_html=True)
