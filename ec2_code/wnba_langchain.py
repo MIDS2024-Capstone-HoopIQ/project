@@ -25,7 +25,7 @@ from urllib.parse import quote_plus
 
 #
 
-os.environ["OPENAI_API_KEY"] = "sk-proj-69WstrZLIgwAEO413QYoT3BlbkFJyPjAmZezAQBuAsctMweZ"
+os.environ["OPENAI_API_KEY"] = "sk-proj-hM4kJNKNkOELWnd4GSG2T3BlbkFJtZB0XT3NCJXm82N4GARo"
 
 #
 
@@ -73,12 +73,14 @@ file_paths = ["src/wnba_nba_pbp_data_dict.json", "src/wnba_player_box.json", "sr
 #
 
 def get_table_details():
+    table_details = ""
     for file_path in file_paths:
         f = open(file_path)
         table_dict = json.load(f)
-        table_details = ""
-        table_details = table_details + "Table Name:" + table_dict['table_name'] + "\n" \
-        + "Table Description:" + table_dict['table_description'] + "\n\n"
+        table_details = table_details + "Table Name:" + table_dict['table_name'] + "\n" + "Table Description:" + table_dict['table_description']
+        for col in table_dict['values']:
+            table_details = table_details + "\n" + "Column Name:" + col['column_name'] + "\n" + "Column Description:" + col['column_description'] + "\n" + "Column Type:" + col['column_type']
+        table_details = table_details + "\n\n"
     return table_details
 
 #
