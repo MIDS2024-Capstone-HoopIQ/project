@@ -1,4 +1,5 @@
 import boto3
+import json
 import os
 import requests
 from langchain.agents import AgentExecutor
@@ -13,18 +14,40 @@ from langchain_community.chat_message_histories import (
 )
 from langchain_community.utilities import SQLDatabase
 from langchain_core.messages import AIMessage, HumanMessage
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers.openai_tools import PydanticToolsParser
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, FewShotChatMessagePromptTemplate
 from langchain_core.prompts import MessagesPlaceholder
+from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain.globals import set_debug
 from langchain_openai import ChatOpenAI
 from sqlalchemy import create_engine
 from urllib.parse import quote_plus
 
-AWS_REGION = "us-east-1" # Change me
-SCHEMA_NAME = "wnba_db" # Athena calls this a database
-S3_STAGING_DIR = "s3://wnbadata/" # Change me
+#
+
+os.environ["OPENAI_API_KEY"] = "sk-proj-69WstrZLIgwAEO413QYoT3BlbkFJyPjAmZezAQBuAsctMweZ"
+
+#
 
 dynamodb = boto3.resource("dynamodb")
+
+composite_key = {
+    "SessionId": "session_id::0",
+    "UserID": "0001",
+}
+
+chat_history = DynamoDBChatMessageHistory(
+    table_name="Chat_Table",
+    session_id="0",
+    key = composite_key,
+    history_size = 6,
+)
+
+#
+
+AWS_REGION = "us-east-1"
+SCHEMA_NAME = "wnba_db"
+S3_STAGING_DIR = "s3://wnbadata/"
 
 connect_str = "awsathena+rest://athena.{region_name}.amazonaws.com:443/{schema_name}?s3_staging_dir={s3_staging_dir}"
 
@@ -37,34 +60,91 @@ engine = create_engine(connect_str.format(
 db = SQLDatabase(engine)
 schema = db.get_table_info()
 
-os.environ["OPENAI_API_KEY"] = "sk-proj-Jz56EPt2tMFrDJtB1Q2dT3BlbkFJBOkimFUK14hExlzvsvJF"
+#
 
-llm = ChatOpenAI( model_name= "gpt-4", temperature= 0)
+f = open("src/query_example.json")
+query_examples_json = json.load(f)
+examples = query_examples_json["query_examples"]
+
+#
+
+file_paths = ["src/wnba_nba_pbp_data_dict.json", "src/wnba_player_box.json", "src/wnba_player_info.json", "src/wnba_schedule.json", "src/wnba_teambox.json"]
+
+#
+
+def get_table_details():
+    for file_path in file_paths:
+        f = open(file_path)
+        table_dict = json.load(f)
+        table_details = ""
+        table_details = table_details + "Table Name:" + table_dict['table_name'] + "\n" \
+        + "Table Description:" + table_dict['table_description'] + "\n\n"
+    return table_details
+
+#
+
+class Table(BaseModel):
+    """Table in SQL database."""
+    name: str = Field(description = "Name of table in SQL database.")
+
+table_details = get_table_details()
+
+table_prompt_system = f"""Refer the Above Context and Return the names of SQL Tables that MIGHT be relevant to the above context\n\n
+The tables are:
+
+{table_details}
+"""
+
+table_details_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", table_prompt_system),
+        ("human", "{input}"),
+    ]
+)
+
+table_chain_llm = ChatOpenAI(model_name= "gpt-3.5-turbo-0125", temperature=0)
+table_chain_llm_wtools = table_chain_llm.bind_tools([Table])
+output_parser = PydanticToolsParser(tools=[Table])
+
+table_chain = table_details_prompt | table_chain_llm_wtools | output_parser
+
+#
+
+llm = ChatOpenAI(model_name= "gpt-3.5-turbo-0125", temperature=0)
 toolkit = SQLDatabaseToolkit(db=db, llm=llm)
 tools = toolkit.get_tools()
 llm_with_tools = llm.bind_tools(tools)
 
+example_prompt = ChatPromptTemplate.from_messages(["User input: {input}\nSQL query: {query}"])
+few_shot_prompt = FewShotChatMessagePromptTemplate(
+    examples = examples,
+    example_prompt = example_prompt,
+)
+
 prompt = ChatPromptTemplate.from_messages([
     (
         "system",
-        """You are an agent designed to interact with a SQL database.
+        """You are an agent designed to interact with a SQL database to answer questions about the WNBA.
         Given an input question, create a syntactically correct SQLite query to run, then look at the results of the query and return the answer.
+        You should also leverage your pre-existing knowledge of WNBA rules, statistics, teams, players, and history to understand and interpret user questions and your answer accurately.
         Unless the user specifies a specific number of examples they wish to obtain, always limit your query to at most 5 results.
         You can order the results by a relevant column to return the most interesting examples in the database.
         Never query for all the columns from a specific table, only ask for the relevant columns given the question.
         You have access to tools for interacting with the database.
         Only use the below tools. Only use the information returned by the below tools to construct your final answer.
+        Base your final answer solely on the information returned by these tools, combined with your existing knowledge of the WNBA.
         You MUST double check your query before executing it. If you get an error while executing a query, rewrite the query and try again.
         
         DO NOT make any DML statements (INSERT, UPDATE, DELETE, DROP etc.) to the database.
         
         To start you should ALWAYS look at the tables in the database to see what you can query.
         Do NOT skip this step.
-        Then you should query the schema of the most relevant tables.""",
+        Then you should query the schema of the most relevant tables. Here is the relevant table info: {table_names_to_use}.""",
     ),
-    MessagesPlaceholder(variable_name="chat_history"),
+    few_shot_prompt,
+    MessagesPlaceholder(variable_name = "chat_history"),
     ("user", "{input}"),
-    MessagesPlaceholder(variable_name="agent_scratchpad"),
+    MessagesPlaceholder(variable_name = "agent_scratchpad"),
 ])
 
 agent = (
@@ -74,29 +154,23 @@ agent = (
             x["intermediate_steps"]
         ),
         "chat_history": lambda x: x["chat_history"],
+        "table_names_to_use": lambda x: x["table_names_to_use"],
     }
     | prompt
     | llm_with_tools
     | OpenAIToolsAgentOutputParser()
 )
+
 agent_executor = AgentExecutor(agent = agent, tools = tools, verbose = False, return_intermediate_steps = True)
 
-my_key = {
-    "SessionId": "session_id::0",
-    "UserID": "0001",
-}
-
-chat_history = DynamoDBChatMessageHistory(
-    table_name="Chat_Table",
-    session_id="0",
-    key=my_key,
-)
+#
 
 def get_response(input_text):
 	if input_text:
 		response = agent_executor.invoke({
 			'input': input_text,
 			'chat_history': chat_history.messages,
+			'table_names_to_use': table_chain.invoke(input_text),
 		})
 		chat_history.add_user_message(input_text)
 		chat_history.add_ai_message(response["output"])
