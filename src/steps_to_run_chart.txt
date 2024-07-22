@@ -15,4 +15,4 @@ pip install boto3
 pip install pyathena
 
 
-e) streamlit run chart_try.py
+e) streamlit run main.py
