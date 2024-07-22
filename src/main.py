@@ -1,11 +1,14 @@
 import pandas as pd
-import plotly.express as px
+#import plotly.express as px
+#import plotly.graph_objects as go
 import streamlit as st
 from sqlalchemy import create_engine
 from urllib.parse import quote_plus
 import boto3
-from courtCoordinates import CourtCoordinates
-from basketballShot import BasketballShot
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from matplotlib.patches import Arc, Rectangle, Circle
 
 # Define constants
 AWS_REGION = "us-east-1"
@@ -28,21 +31,6 @@ color_mapping = {
     'away': '#ff7f0e'
 }
 
-# Build the court
-# draw court lines
-court = CourtCoordinates()
-court_lines_df = court.get_court_lines()
-
-
-# Display a Plotly 3D Line plot on Streamlit
-fig = px.line_3d(
-   data_frame=court_lines_df, x='x', y='y', z='z', line_group='line_group', color='color',
-   color_discrete_map={
-       'court': '#000000',
-       'hoop': '#e47041'
-   }
-)
-fig.update_traces(hovertemplate=None, hoverinfo='skip', showlegend=False)
 
 # Execute the custom query to get shot chart data
 query = """
@@ -65,86 +53,71 @@ WHERE ws.id = '401578572'
 """
 game_shots_df = pd.read_sql(query, engine)
 
-# Each row in the DataFrame is one attempted shot
-game_coords_df = pd.DataFrame()
+# Helper function to draw the court in left/right direction
+def draw_court(ax=None, color='black', lw=2, outer_lines=False):
+    if ax is None:
+        ax = plt.gca()
+    # hoop
+    hoop_left = Circle((-45, 0), radius=0.75, linewidth=lw, color=color, fill=False)
+    hoop_right = Circle((45, 0), radius=0.75, linewidth=lw, color=color, fill=False)
+    # backboard
+    backboard_left = Rectangle((-46, -3), 0.1, 6, linewidth=lw, color=color)
+    backboard_right = Rectangle((45, -3), 0.1, 6, linewidth=lw, color=color)
+    # paint
+    outer_box_left = Rectangle((-45, -8), 19, 16, linewidth=lw, color=color, fill=False)
+    outer_box_right = Rectangle((26, -8), 19, 16, linewidth=lw, color=color, fill=False)
+    inner_box_left = Rectangle((-45, -6), 19, 12, linewidth=lw, color=color, fill=False)
+    inner_box_right = Rectangle((26, -6), 19, 12, linewidth=lw, color=color, fill=False)
+    # free throw top arc
+    top_free_throw_left = Arc((-26, 0), 12, 12, theta1=90, theta2=270, linewidth=lw, color=color, fill=False)
+    top_free_throw_right = Arc((26, 0), 12, 12, theta1=270, theta2=90, linewidth=lw, color=color, fill=False)
+    # free throw bottom arc
+    bottom_free_throw_left = Arc((-26, 0), 12, 12, theta1=270, theta2=90, linewidth=lw, color=color, linestyle='dashed')
+    bottom_free_throw_right = Arc((26, 0), 12, 12, theta1=90, theta2=270, linewidth=lw, color=color, linestyle='dashed')
+    # restricted zone
+    restricted_left = Arc((-45, 0), 8, 8, theta1=270, theta2=90, linewidth=lw, color=color)
+    restricted_right = Arc((45, 0), 8, 8, theta1=90, theta2=270, linewidth=lw, color=color)
+    # three point line
+    corner_three_a_left = Rectangle((-45, -22), 14, 0, linewidth=lw, color=color)
+    corner_three_b_left = Rectangle((-45, 22), 14, 0, linewidth=lw, color=color)
+    corner_three_a_right = Rectangle((31, -22), 14, 0, linewidth=lw, color=color)
+    corner_three_b_right = Rectangle((31, 22), 14, 0, linewidth=lw, color=color)
+    
+    three_arc_left = Arc((-38, 0), 44.6, 44.6, theta1=270, theta2=90, linewidth=lw, color=color)
+    three_arc_right = Arc((38, 0), 44.6, 44.6, theta1=90, theta2=270, linewidth=lw, color=color)
+    
+    # center court
+    center_outer_arc = Arc((0, 0), 12, 12, theta1=0, theta2=360, linewidth=lw, color=color)
+    center_inner_arc = Arc((0, 0), 4, 4, theta1=0, theta2=360, linewidth=lw, color=color)
+    court_elements = [hoop_left, hoop_right, backboard_left, backboard_right, outer_box_left, outer_box_right,
+                      inner_box_left, inner_box_right, top_free_throw_left, top_free_throw_right, 
+                      bottom_free_throw_left, bottom_free_throw_right, restricted_left, restricted_right, 
+                      corner_three_a_left, corner_three_b_left, corner_three_a_right, corner_three_b_right,
+                      three_arc_left, three_arc_right, center_outer_arc, center_inner_arc]
+    if outer_lines:
+        outer_lines = Rectangle((-50, -25), 100, 50, linewidth=lw, color=color, fill=False)
+        court_elements.append(outer_lines)
+    for element in court_elements:
+        ax.add_patch(element)
+    return ax
 
-# Generate coordinates for shot paths
-for index, row in game_shots_df.iterrows():
-    shot = BasketballShot(
-        shot_start_x=row['coordinate_x'],
-        shot_start_y=row['coordinate_y'],
-        shot_id=row['sequence_number'],
-        play_description=row['text'],
-        shot_made=row['scoring_play'],
-        team=row['scoring_team']
-    )
-    shot_df = shot.get_shot_path_coordinates()
-    game_coords_df = pd.concat([game_coords_df, shot_df])
+# Create the plot
+fig, ax = plt.subplots(figsize=(15, 8))
 
-# Pass the coordinates DataFrame to a Plotly 3D Line plot
-shot_path_fig = px.line_3d(
-   data_frame=game_coords_df,
-   x='x',
-   y='y',
-   z='z',
-   line_group='line_id',
-   color='team',
-   color_discrete_map=color_mapping,
-   custom_data=['description']
-)
-hovertemplate='Description'
-fig.update_traces(opacity=0.55, hovertemplate=hovertemplate, showlegend=False)
+# Draw the court
+draw_court(ax, outer_lines=True)
 
-# shot start scatter plots
-game_coords_start = game_coords_df[game_coords_df['shot_coord_index'] == 0]
-shot_start_fig = px.scatter_3d(
-    data_frame=game_coords_start,
-    x='x',
-    y='y',
-    z='z',
-    custom_data=['description'],
-    color='team',
-    color_discrete_map=color_mapping,
-    symbol='shot_made',
-    symbol_map={'made': 'circle', 'missed': 'x'}
-)
+# Plot the shots
+ax.scatter(game_shots_df['coordinate_x'], game_shots_df['coordinate_y'], c=game_shots_df['scoring_team'].map({'home': 'blue', 'away': 'orange'}), s=100, alpha=0.6, edgecolors='k')
 
-shot_start_fig.update_traces(marker_size=4, hovertemplate=hovertemplate)
+# Customize plot
+ax.set_title('Basketball Shot Chart')
+ax.set_xlim(-50, 50)
+ax.set_ylim(-25, 25)
+ax.set_aspect('equal')  # Set the aspect ratio to make the court proportional
+ax.set_xlabel('Court Length')
+ax.set_ylabel('Court Width')
+ax.legend(loc='upper right')
 
-# add shot scatter plot to court plot
-for i in range(len(shot_start_fig.data)):
-    fig.add_trace(shot_start_fig.data[i])
-
-# add shot line plot to court plot
-for i in range(len(shot_path_fig.data)):
-    fig.add_trace(shot_path_fig.data[i])
-
-# graph styling
-fig.update_traces(line=dict(width=5))
-fig.update_layout(    
-    margin=dict(l=20, r=20, t=20, b=20),
-    scene_aspectmode="data",
-    height=600,
-    scene_camera=dict(
-        eye=dict(x=1.3, y=0, z=0.7)
-    ),
-    scene=dict(
-        xaxis=dict(title='', showticklabels=False, showgrid=False),
-        yaxis=dict(title='', showticklabels=False, showgrid=False),
-        zaxis=dict(title='',  showticklabels=False, showgrid=False, showbackground=True, backgroundcolor='#f7f0e8'),
-    ),
-    legend=dict(
-        yanchor='bottom',
-        y=0.05,
-        x=0.2,
-        xanchor='left',
-        orientation='h',
-        font=dict(size=15, color='black'),
-        bgcolor='white',
-        title='',
-        itemsizing='constant'
-    ),
-    legend_traceorder="reversed"
-)
-
-st.plotly_chart(fig, use_container_width=True)
+# Display the plot in Streamlit
+st.pyplot(fig)
