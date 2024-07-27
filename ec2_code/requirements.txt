@@ -1,0 +1,6 @@
+streamlit
+pandas
+boto3
+sqlalchemy
+openai
+requests
