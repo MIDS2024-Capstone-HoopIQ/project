@@ -2,6 +2,20 @@ import streamlit as st
 
 def about():
     st.title("About HoopsIQ")
+    
+    st.markdown(
+		"""
+		<style>
+		.big-divider {
+			height: 5px;
+			background-color: #333;
+			margin: 20px 0;
+		}
+		</style>
+		<div class="big-divider"></div>
+		""",
+		unsafe_allow_html=True
+	)
 
     st.markdown("""
     # HoopsIQ - WNBA Data Analysis
@@ -22,6 +36,7 @@ def about():
     - **WNBA Official Data**: Data collected from the official WNBA website.
     - **Third-Party APIs**: Additional data from sports data providers.
     - **Custom Data Collection**: Data collected through web scraping and other methods.
+    - **Note**: Our dataset includes complete records for the 2018-2023 seasons and partial information (up until May 24, 2024) for the ongoing 2024 season.
 
     ## Future Work
     - **Model Improvement**: Continuously improving our predictive models for better accuracy.
@@ -35,20 +50,20 @@ def about():
     
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.image("./images/anoop.jpeg", caption="Anoop Nair", width=150)
-        st.markdown("[Anoop Nair](https://ca.slack-edge.com/T0WA5NWKG-U036K0B99DH-13e5b97869fb-512)")
+        st.image("./images/anoop.jpeg", caption="", width=150)
+        st.markdown("[Anoop Nair](https://www.linkedin.com/in/anooprajnair/)")
     
     with col2:
-        st.image("./images/iishan.png", caption="Iishan Shekar", width=150)
-        st.markdown("[Iishan Shekar](https://ca.slack-edge.com/T0WA5NWKG-U04C1PERAFP-b5839f0ff587-512)")
+        st.image("./images/iishaan.png", caption="", width=150)
+        st.markdown("[Iishaan Shekhar](https://www.linkedin.com/in/iishaan-shekhar/)")
     
     with col3:
-        st.image("./images/aakash.jpeg", caption="Aakash Venkat", width=150)
-        st.markdown("[Aakash Venkat](https://ca.slack-edge.com/T0WA5NWKG-U02M5LL1WE9-f713bcd6c2c7-512)")
+        st.image("./images/akaash.jpeg", caption="", width=147)
+        st.markdown("[Akaash Venkat](https://www.linkedin.com/in/akaashvenkat/)")
     
     with col4:
-        st.image("./images/IHsiuKao.jpeg", caption="I-Hsiu Kao", width=150)
-        st.markdown("[I-Hsiu Kao](https://ca.slack-edge.com/T0WA5NWKG-U049MTV2GDV-488e5391f931-512)")
+        st.image("./images/IHsiuKao.jpeg", caption="", width=150)
+        st.markdown("[I-Hsiu Kao](https://www.linkedin.com/in/ihsiukao/)")
 
     # Add more sections as needed
     st.markdown("""
