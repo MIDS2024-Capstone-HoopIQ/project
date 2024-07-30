@@ -7,9 +7,9 @@ def about():
 		"""
 		<style>
 		.big-divider {
-			height: 5px;
+			height: 10px;
 			background-color: #333;
-			margin: 20px 0;
+			margin: 10px 0;
 		}
 		</style>
 		<div class="big-divider"></div>

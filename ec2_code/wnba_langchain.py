@@ -157,10 +157,10 @@ class VisualizationChain:
             {"table": {"columns": ["column1", "column2", ...], "data": [[value1, value2, ...], [value1, value2, ...], ...]}}
             
             If the query requires creating a bar chart, reply as follows:
-            {"bar": {"columns": ["A", "B", "C", ...], "data": [25, 24, 10, ...]}}
+            {"bar": {"columns": ["A", "B", "C", ...], "data": [[value1, value2, ...], [value1, value2, ...], [value1, value2, ...], ...]}}
             
             If the query requires creating a line chart, reply as follows:
-            {"line": {"columns": ["A", "B", "C", ...], "data": [25, 24, 10, ...]}}
+            {"line": {"columns": ["A", "B", "C", ...], "data": [[value1, value2, ...], [value1, value2, ...], [value1, value2, ...], ...]}}
             
             There can only be two types of chart, "bar" and "line".
             
@@ -182,35 +182,47 @@ class VisualizationChain:
         )
         
         response = self.visualization_chain.invoke(vis_prompt)
-        self.plot(response)
+        return self.plot(response)
         
     def plot(self, response_dict):
         # Check if the response is an answer.
         if "answer" in response_dict:
-            return
-        # Check if the response is a bar chart.
-        if "bar" in response_dict:
-            data = response_dict["bar"]
-            df = pd.DataFrame.from_dict(data)
-            plt.bar(df["columns"].values, df["data"].values)
-            plt.xticks(rotation = 315)
-            plt.show()
-    
-        # Check if the response is a line chart.
-        if "line" in response_dict:
-            data = response_dict["line"]
-            df = pd.DataFrame.from_dict(data)
-            plt.plot(df["columns"].values, df["data"].values)
-            plt.xticks(rotation = 315)
-            plt.show()
-    
-        # Check if the response is a table.
-        if "table" in response_dict:
-            data = response_dict["table"]
-            df = pd.DataFrame(data["data"], columns = data["columns"])
-            plt.table(cellText = df.values, colLabels = df.columns, loc='center')
-            plt.axis("off")
-            plt.show()
+            return None
+        try:
+            # Check if the response is a bar chart.
+            if "bar" in response_dict:
+                data = response_dict["bar"]
+                columns = data['columns']
+                rows = data['data']
+                df = pd.DataFrame(rows, columns=columns)
+                fig, ax = plt.subplots()
+                ax.bar(df[columns[0]], df[columns[1]])
+                ax.set_xlabel(columns[0])
+                ax.set_ylabel(columns[1])
+                ax.set_xticklabels(df[columns[0]], rotation=315)
+                return fig
+            # Check if the response is a line chart.
+            elif "line" in response_dict:
+                data = response_dict["line"]
+                columns = data['columns']
+                rows = data['data']
+                df = pd.DataFrame(rows, columns=columns)
+                fig, ax = plt.subplots()
+                ax.plot(df[columns[0]], df[columns[1]])
+                ax.set_xlabel(columns[0])
+                ax.set_ylabel(columns[1])
+                ax.set_xticklabels(df[columns[0]], rotation=315)
+                return fig
+            # Check if the response is a table.
+            elif "table" in response_dict:
+                data = response_dict["table"]
+                df = pd.DataFrame(data["data"], columns = data["columns"])
+                fig, ax = plt.subplots()
+                ax.axis("off")  # Hide axes
+                table = ax.table(cellText=df.values, colLabels=df.columns, loc='center')
+                return fig
+        except ValueError as e:
+            return None
 
 #
 
@@ -351,6 +363,10 @@ class QAEngine:
                 agent_executor = AgentExecutor(agent = self.text_sql_agent, tools = self.sql_tools, verbose = False, return_intermediate_steps = True, max_iterations = max_iteration)
                 error_count += 1
                 count += 1
+            except Exception as e:
+                if response is not None and ('SQL query' in response['output'] or 'Agent stopped' in response['output']):
+                    response = None
+                    count += 1
             else:
                 if 'SQL query' in response['output'] or 'Agent stopped' in response['output']:
                     response = None
@@ -359,21 +375,21 @@ class QAEngine:
         if response is not None:
             self.chat_history.add_user_message(query)
             self.chat_history.add_ai_message(response["output"])
-            self.visualization_chain.invoke(response["output"])
-            return response['output']
+            viz = self.visualization_chain.invoke(response["output"])
+            return response['output'], viz
         else:
             self.chat_history.add_user_message(query)
             self.chat_history.add_ai_message("no response")
-            return "no response"
+            return "no response", None
             
 #
 
 awsdb = load_db()
-gpt4T_text2sql = QAEngine("gpt-4o-mini", awsdb, 203, 1)
+gpt4T_text2sql = QAEngine("gpt-4o-mini", awsdb, 205, 1)
 
 #
 
 def get_response(input_text):
 	if input_text:
-		response = gpt4T_text2sql.invoke(input_text)
-		return response
+		response, viz = gpt4T_text2sql.invoke(input_text)
+		return response, viz
