@@ -7,6 +7,7 @@ from typing import List
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 import openai
 import anthropic
@@ -195,11 +196,16 @@ class VisualizationChain:
                 columns = data['columns']
                 rows = data['data']
                 df = pd.DataFrame(rows, columns=columns)
+                df.replace("N/A", np.nan, inplace=True)
                 fig, ax = plt.subplots()
-                ax.bar(df[columns[0]], df[columns[1]])
+                for col in columns[1:]:
+                    ax.bar(df[columns[0]], df[col], label=col)
                 ax.set_xlabel(columns[0])
-                ax.set_ylabel(columns[1])
                 ax.set_xticklabels(df[columns[0]], rotation=315)
+                if (len(columns) > 2):
+                    ax.legend()
+                else:
+                    ax.set_ylabel(columns[1])
                 return fig
             # Check if the response is a line chart.
             elif "line" in response_dict:
@@ -207,11 +213,16 @@ class VisualizationChain:
                 columns = data['columns']
                 rows = data['data']
                 df = pd.DataFrame(rows, columns=columns)
+                df.replace("N/A", np.nan, inplace=True)
                 fig, ax = plt.subplots()
-                ax.plot(df[columns[0]], df[columns[1]])
+                for col in columns[1:]:
+                    ax.plot(df[columns[0]], df[col], marker='o', label=col)
                 ax.set_xlabel(columns[0])
-                ax.set_ylabel(columns[1])
                 ax.set_xticklabels(df[columns[0]], rotation=315)
+                if (len(columns) > 2):
+                    ax.legend()
+                else:
+                    ax.set_ylabel(columns[1])
                 return fig
             # Check if the response is a table.
             elif "table" in response_dict:
@@ -221,7 +232,8 @@ class VisualizationChain:
                 ax.axis("off")  # Hide axes
                 table = ax.table(cellText=df.values, colLabels=df.columns, loc='center')
                 return fig
-        except ValueError as e:
+        except Exception as e:
+            print(e)
             return None
 
 #

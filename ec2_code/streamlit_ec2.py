@@ -10,7 +10,7 @@ def navigate_to(page):
     
 # Define page content
 def home():
-	st.title("HoopsIQ - WNBA")
+	st.title("Hoops IQ - WNBA")
 	st.write("Ask a question about WNBA data:")
 	st.markdown(
 		"""

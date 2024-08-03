@@ -1,7 +1,7 @@
 import streamlit as st
 
 def about():
-    st.title("About HoopsIQ")
+    st.title("About Hoops IQ")
     
     st.markdown(
 		"""
@@ -18,8 +18,8 @@ def about():
 	)
 
     st.markdown("""
-    # HoopsIQ - WNBA Data Analysis
-    Welcome to HoopsIQ! Our project is focused on analyzing WNBA data to provide insights and predictions.
+    # Hoops IQ - WNBA Data Analysis
+    Welcome to Hoops IQ! Our project is focused on analyzing WNBA data to provide insights and predictions.
 
     ## Project Overview
     This project leverages advanced data science techniques and machine learning models to analyze WNBA data. We aim to provide detailed insights into player performance, team statistics, and game outcomes.
