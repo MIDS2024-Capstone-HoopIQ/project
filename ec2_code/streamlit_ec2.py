@@ -4,6 +4,13 @@ import datetime
 from wnba_langchain import get_response
 from about import about
 
+try:
+    # Set tab title
+    st.set_page_config(page_title="Hoops IQ - WNBA")
+except Exception as e:
+    print("Error when trying to set tab title on page")
+    print(e)
+
 # Define navigation function
 def navigate_to(page):
     st.session_state.current_page = page

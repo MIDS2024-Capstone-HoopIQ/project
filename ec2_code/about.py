@@ -73,6 +73,3 @@ def about():
     ## Contact Us
     Feel free to reach out to us for any queries or collaborations.
     """)
-
-# Use the function
-about()
