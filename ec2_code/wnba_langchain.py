@@ -34,7 +34,7 @@ from urllib.parse import quote_plus
 
 #
 
-os.environ["OPENAI_API_KEY"] = "sk-proj-hM4kJNKNkOELWnd4GSG2T3BlbkFJtZB0XT3NCJXm82N4GARo"
+os.environ["OPENAI_API_KEY"] = "***"
 
 #
 
